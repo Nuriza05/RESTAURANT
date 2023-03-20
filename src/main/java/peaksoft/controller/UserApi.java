@@ -32,7 +32,7 @@ public class UserApi {
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
-    public SimpleResponse save(@RequestBody UserRequest request) {
+    public SimpleResponse save(@RequestBody @Valid UserRequest request) {
         return userService.saveUserByAdmin(request);
     }
 
@@ -63,7 +63,7 @@ public class UserApi {
 
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     @PutMapping("/{userId}")
-    public SimpleResponse update(@PathVariable Long userId, @RequestBody UserRequest request) {
+    public SimpleResponse update(@PathVariable Long userId, @RequestBody @Valid UserRequest request) {
         return userService.update(userId, request);
     }
 

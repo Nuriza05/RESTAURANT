@@ -1,6 +1,7 @@
 package peaksoft.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import peaksoft.dto.responses.StopListResponse;
 import peaksoft.entity.MenuItem;
@@ -17,4 +18,8 @@ public interface StopListRepository extends JpaRepository<StopList, Long> {
     Optional<StopListResponse> getStopById(Long id);
 
     Boolean existsByMenuItem(MenuItem menuItem);
+
+    @Modifying
+    @Query("delete from StopList t where t.id = ?1")
+    void delete(Long entityId);
 }

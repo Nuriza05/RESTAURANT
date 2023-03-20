@@ -194,22 +194,25 @@ public class UserServiceImpl implements UserService {
     @Override
     public SimpleResponse update(Long userId, UserRequest request) {
         User user = repository.findById(userId).orElseThrow(() -> new NoSuchElementException("User with id: " + userId + " is no exist!"));
-//        Boolean exists = repository.existsByEmail(request.email());
-//        if(!exists) {
-            user.setFirstName(request.firstName());
-            user.setLastName(request.lastName());
-            user.setDateOfBirth(request.dateOfBirth());
-            user.setEmail(request.email());
-            user.setPassword(request.password());
-            user.setPhoneNumber(request.phoneNumber());
-            user.setExperience(request.experience());
-            repository.save(user);
-            return SimpleResponse.builder().status(HttpStatus.OK).message("User with id: " + userId + " is updated!").build();
-//        }else {
-//            return SimpleResponse.builder().status(HttpStatus.FORBIDDEN).message("Email is already exists!").build();
-//        }
+        List<User> all = repository.findAll();
+        all.remove(user);
+        for (User user1 : all) {
+            if (!user1.getEmail().equals(request.email())) {
+                user.setFirstName(request.firstName());
+                user.setLastName(request.lastName());
+                user.setDateOfBirth(request.dateOfBirth());
+                user.setEmail(request.email());
+                user.setPassword(request.password());
+                user.setPhoneNumber(request.phoneNumber());
+                user.setExperience(request.experience());
+                repository.save(user);
+                return SimpleResponse.builder().status(HttpStatus.OK).message("User with id: " + userId + " is updated!").build();
+            } else {
+                return SimpleResponse.builder().status(HttpStatus.FORBIDDEN).message("Email is already exists!").build();
+            }
+        }
+        return null;
     }
-
     @Override
     public SimpleResponse deleteById(Long userId) {
         repository.deleteById(userId);

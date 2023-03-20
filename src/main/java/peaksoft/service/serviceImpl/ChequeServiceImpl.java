@@ -16,6 +16,7 @@ import peaksoft.repository.UserRepository;
 import peaksoft.service.ChequeService;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -67,9 +68,16 @@ public class ChequeServiceImpl implements ChequeService {
     @Override
     public SimpleResponse update(Long id, ChequeRequest request) {
         Cheque cheque = chequeRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Check not found!"));
-        List<MenuItem> allById = menuItemRepository.findAllById(request.menuItemsId());
         User user = userRepository.findById(request.userId()).orElseThrow(() -> new NoSuchElementException("User not found!"));
-        cheque.setMenuItems(allById);
+        List<MenuItem> menuItems = new ArrayList<>();
+
+        System.out.println(cheque);
+        for (Long menuItemId : request.menuItemsId()) {
+            MenuItem menuItem = menuItemRepository.findById(menuItemId).get();
+            menuItems.add(menuItem);
+        }
+
+        cheque.setMenuItems(menuItems);
         cheque.setUser(user);
         chequeRepository.save(cheque);
         return SimpleResponse.builder().status(HttpStatus.OK).message("Successfully updated!").build();

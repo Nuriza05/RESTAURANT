@@ -1,5 +1,6 @@
 package peaksoft.service.serviceImpl;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ import java.util.NoSuchElementException;
 public class StopListServiceImpl implements StopListService {
     private final StopListRepository stopListRepository;
     private final MenuItemRepository menuItemRepository;
+
     @Autowired
     public StopListServiceImpl(StopListRepository stopListRepository, MenuItemRepository menuItemRepository) {
         this.stopListRepository = stopListRepository;
@@ -33,9 +35,9 @@ public class StopListServiceImpl implements StopListService {
     public SimpleResponse save(StopListRequest request) {
         MenuItem menuItem = menuItemRepository.findById(request.menuItemId()).orElseThrow(() -> new NoSuchElementException("MenuItem is not"));
         Boolean exists = stopListRepository.existsByMenuItem(menuItem);
-        if(exists && menuItem.getStopList().getDate().equals(request.date())){
+        if (exists && menuItem.getStopList().getDate().equals(request.date())) {
             throw new KeyAlreadyExistsException("This info already exist!");
-        }else {
+        } else {
             StopList stopList = new StopList();
             stopList.setDate(request.date());
             stopList.setReason(request.reason());
@@ -48,16 +50,18 @@ public class StopListServiceImpl implements StopListService {
 
     @Override
     public List<StopListResponse> getAll() {
-       return stopListRepository.getAllStops();
+        return stopListRepository.getAllStops();
     }
 
     @Override
     public StopListResponse getById(Long id) {
-        return stopListRepository.getStopById(id).orElseThrow(()-> new NoSuchElementException("StopList database de jok!"));
+        return stopListRepository.getStopById(id).orElseThrow(() -> new NoSuchElementException("StopList database de jok!"));
     }
 
     @Override
     public SimpleResponse update(Long id, StopListRequest request) {
+        System.out.println(request.menuItemId());
+        System.out.println(id);
         StopList st = stopListRepository.findById(id).orElseThrow(() -> new NoSuchElementException("StopList database de jok!"));
         MenuItem menuItem = menuItemRepository.findById(request.menuItemId()).orElseThrow(() -> new NoSuchElementException("Myndai Menu jok"));
         Boolean exists = stopListRepository.existsByMenuItem(menuItem);
@@ -74,10 +78,11 @@ public class StopListServiceImpl implements StopListService {
     }
 
     @Override
+    @Transactional
     public SimpleResponse deleteById(Long id) {
         StopList st = stopListRepository.findById(id).orElseThrow(() -> new NoSuchElementException("StopList jok"));
         st.getMenuItem().setInStock(true);
-        stopListRepository.deleteById(id);
+        stopListRepository.delete(id);
         return SimpleResponse.builder().status(HttpStatus.OK).message("It is deleted!").build();
     }
 }

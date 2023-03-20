@@ -36,7 +36,7 @@ public class StopListApi {
     }
     @PreAuthorize("hasAnyAuthority('ADMIN','CHEF')")
     @PutMapping("/{id}")
-    public SimpleResponse update(@PathVariable Long id, StopListRequest request){
+    public SimpleResponse update(@PathVariable Long id, @RequestBody  StopListRequest request){
         return stopListService.update(id,request);
     }
     @PreAuthorize("hasAnyAuthority('ADMIN','CHEF')")

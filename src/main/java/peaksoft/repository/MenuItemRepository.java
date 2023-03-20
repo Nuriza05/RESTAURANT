@@ -23,8 +23,8 @@ public interface MenuItemRepository extends JpaRepository<MenuItem, Long> {
 
     @Query("select new peaksoft.dto.responses.MenuItemResponse(m.subcategory.name,m.id,m.name,m.image,m.price,m.description,m.isVegetarian) from MenuItem m where m.InStock=true order by m.price desc ")
     List<MenuItemResponse> sortByPriceDesc();
-    @Query("select new peaksoft.dto.responses.MenuItemResponse(m.subcategory.name,m.id,m.name,m.image,m.price,m.description,m.isVegetarian) from MenuItem m where lower(m.name) like lower(concat('%',:word,'%'))or " +
+    @Query("select new peaksoft.dto.responses.MenuItemResponse(m.subcategory.name,m.id,m.name,m.image,m.price,m.description,m.isVegetarian) from MenuItem m where m.InStock=true or lower(m.name) like lower(concat('%',:word,'%'))or " +
             "lower(m.subcategory.name) like lower(concat('%', :word, '%')) or " +
-            "lower(m.subcategory.category.name) like lower(concat('%', :word, '%'))")
+            "lower(m.subcategory.category.name) like lower(concat('%', :word, '%')) ")
     List<MenuItemResponse> globalSearch(String word);
 }
