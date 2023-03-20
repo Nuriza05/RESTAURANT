@@ -1,5 +1,6 @@
 package peaksoft.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +22,7 @@ public class MenuItemApi {
     }
     @PreAuthorize("hasAnyAuthority('ADMIN','CHEF')")
     @PostMapping
-    public SimpleResponse save(@RequestBody MenuItemRequest request){
+    public SimpleResponse save(@RequestBody @Valid MenuItemRequest request){
         return menuItemService.save(request);
     }
     @PreAuthorize("hasAnyAuthority('ADMIN','CHEF','WAITER')")
@@ -31,7 +32,7 @@ public class MenuItemApi {
     }
     @PreAuthorize("hasAnyAuthority('ADMIN','CHEF')")
     @PutMapping("/{id}")
-    public SimpleResponse update(@PathVariable Long id, @RequestBody MenuItemRequest request){
+    public SimpleResponse update(@PathVariable Long id, @RequestBody @Valid MenuItemRequest request){
         return menuItemService.update(id,request);
     }
     @PreAuthorize("hasAnyAuthority('ADMIN','CHEF')")
@@ -41,7 +42,7 @@ public class MenuItemApi {
     }
     @PreAuthorize("hasAnyAuthority('ADMIN','CHEF','WAITER')")
     @GetMapping(("/search"))
-    public List<MenuItemResponse> globalSearch(@RequestParam(required = false) String word){
+    public List<MenuItemResponse> globalSearch(@RequestParam(required = false) @Valid String word){
         return menuItemService.globalSearch(word);
     }
     @PreAuthorize("hasAnyAuthority('ADMIN','CHEF','WAITER')")

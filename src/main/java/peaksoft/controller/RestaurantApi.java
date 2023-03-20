@@ -1,5 +1,6 @@
 package peaksoft.controller;
 
+import jakarta.validation.Valid;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,7 +24,7 @@ public class RestaurantApi {
     }
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
-    public SimpleResponse save(@RequestBody RestaurantRequest request){
+    public SimpleResponse save(@RequestBody @Valid RestaurantRequest request){
         return restaurantService.save(request);
     }
 
@@ -33,7 +34,7 @@ public class RestaurantApi {
     }
     @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/{id}")
-    public SimpleResponse update(@PathVariable Long id, @RequestBody RestaurantRequest request ){
+    public SimpleResponse update(@PathVariable Long id, @RequestBody @Valid RestaurantRequest request ){
         return restaurantService.update(id,request);
     }
     @PreAuthorize("hasAuthority('ADMIN')")
