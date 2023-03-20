@@ -3,6 +3,7 @@ package peaksoft.dto.requests;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Builder;
 import org.hibernate.annotations.Check;
 import org.hibernate.validator.constraints.Length;
@@ -16,10 +17,13 @@ import java.time.LocalDate;
 @Builder
 public record UserRequest(
         @NotNull(message = "restaurant id shouldn't be null!")
+        @Positive(message = "restaurant id should be positive number!")
         Long restaurantId,
         @NotNull(message = "firstName shouldn't ne null!")
+        @Length(min = 2, max = 20, message = "Name's length should be between 2 and 20!")
         String firstName,
         @NotNull(message = "lastName shouldn't be null")
+        @Length(min = 2, max = 20, message = "Name's length should be between 2 and 20!")
         String lastName,
         @NotNull(message = "Date of birth shouldn't be null")
         LocalDate dateOfBirth,
@@ -33,6 +37,7 @@ public record UserRequest(
         @Length(min = 13, max = 13, message = "phone number length should be 13")
         String phoneNumber,
         @NotNull(message = "experience shouldn't be null!")
+        @Positive(message = "experience should be positive number!")
         int experience,
         @NotNull(message = "experience shouldn't be null!")
         Role role

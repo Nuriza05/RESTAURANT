@@ -1,5 +1,4 @@
 package peaksoft.service.serviceImpl;
-
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,8 +11,8 @@ import peaksoft.entity.StopList;
 import peaksoft.repository.MenuItemRepository;
 import peaksoft.repository.StopListRepository;
 import peaksoft.service.StopListService;
-
 import javax.management.openmbean.KeyAlreadyExistsException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -42,7 +41,7 @@ public class StopListServiceImpl implements StopListService {
             stopList.setDate(request.date());
             stopList.setReason(request.reason());
             stopList.setMenuItem(menuItem);
-            menuItem.setInStock(false);
+            menuItem.setStopList(stopList);
             stopListRepository.save(stopList);
             return SimpleResponse.builder().status(HttpStatus.OK).message("StopList is saved!").build();
         }
@@ -64,18 +63,16 @@ public class StopListServiceImpl implements StopListService {
         System.out.println(id);
         StopList st = stopListRepository.findById(id).orElseThrow(() -> new NoSuchElementException("StopList database de jok!"));
         MenuItem menuItem = menuItemRepository.findById(request.menuItemId()).orElseThrow(() -> new NoSuchElementException("Myndai Menu jok"));
-        Boolean exists = stopListRepository.existsByMenuItem(menuItem);
-        if (exists && menuItem.getStopList().getDate().equals(request.date())) {
-            throw new KeyAlreadyExistsException("This info already exist!");
-        } else {
-            menuItem.setInStock(false);
+//        Boolean exists = stopListRepository.existsByMenuItem(menuItem);
+//        if (exists && menuItem.getStopList().getDate().equals(request.date())) {
+//            throw new KeyAlreadyExistsException("This info already exist!");
+//        } else {
             st.setMenuItem(menuItem);
             st.setReason(request.reason());
             st.setDate(request.date());
             stopListRepository.save(st);
             return SimpleResponse.builder().status(HttpStatus.OK).message("It is successfully updated!").build();
         }
-    }
 
     @Override
     @Transactional
