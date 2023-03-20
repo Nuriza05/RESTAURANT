@@ -1,6 +1,7 @@
 package peaksoft.config;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -18,7 +19,8 @@ public class SecurityConfig {
     private final JwtFilter jwtFilter;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+    @SneakyThrows
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity)  {
         httpSecurity.csrf()
                 .disable()
                 .authorizeHttpRequests(auth -> auth
@@ -27,4 +29,5 @@ public class SecurityConfig {
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
     }
+
 }

@@ -10,11 +10,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import peaksoft.entity.AuthInfo;
-import peaksoft.repository.AuthInfoRepository;
+import peaksoft.entity.User;
+import peaksoft.repository.UserRepository;
 
 import java.io.IOException;
 
@@ -22,7 +21,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
-    private final AuthInfoRepository authInfoRepository;
+    private final UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
@@ -41,14 +40,13 @@ public class JwtFilter extends OncePerRequestFilter {
                 try {
                     String username = jwtUtil.validateTokenAndRetrieveClaim(jwt);
 
-                    AuthInfo authInfo=authInfoRepository.findByEmail(username).get();
-//                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                    User user = userRepository.findByEmail(username).get();
 
                     UsernamePasswordAuthenticationToken authenticationToken =
                             new UsernamePasswordAuthenticationToken(
-                                    authInfo.getEmail(),
-                                   null,
-                                  authInfo.getAuthorities());
+                                    user.getEmail(),
+                                    null,
+                                    user.getAuthorities());
 
                     if (SecurityContextHolder.getContext().getAuthentication() == null) {
                         SecurityContextHolder.getContext().setAuthentication(authenticationToken);

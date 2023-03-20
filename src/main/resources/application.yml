@@ -1,0 +1,12 @@
+   spring:
+    datasource:
+      username: postgres
+      url: jdbc:postgresql://localhost:5432/restapi
+      password: postgres
+    jpa:
+      hibernate:
+        ddl-auto: update
+      show-sql: true
+    jwt:
+      secret_key: Java8IsTheBest
+

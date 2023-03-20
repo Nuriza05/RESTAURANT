@@ -9,24 +9,26 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import peaksoft.repository.AuthInfoRepository;
+import peaksoft.repository.UserRepository;
 
+/**
+ * @created : Lenovo Nuriza
+ **/
 @EnableWebSecurity
 @Configuration
 @RequiredArgsConstructor
 @EnableMethodSecurity
 public class WebAppSecurity {
-    private final AuthInfoRepository authInfoRepository;
+    private final UserRepository userRepository;
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return email -> authInfoRepository.findByEmail(email)
-                .orElseThrow(() ->
-                        new UsernameNotFoundException(email + " is not found!"));
+        return email -> (UserDetails) userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException(email + " is not found!"));
     }
 
     @Bean
@@ -42,9 +44,10 @@ public class WebAppSecurity {
         return daoAuthenticationProvider;
     }
 
-
     @Bean
     AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+
         return configuration.getAuthenticationManager();
     }
+
 }

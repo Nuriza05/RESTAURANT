@@ -15,14 +15,14 @@ import java.util.Date;
 @Service
 public class JwtUtil {
 
-    @Value("${spring.jwt.secret_key}")
+    @Value("Java8IsTheBest")
     private String SECRET_KEY;
 
     public String generateToken(UserDetails userDetails){
         return JWT.create()
                 .withClaim("username",userDetails.getUsername())
                 .withIssuedAt(new Date())
-                .withExpiresAt(Date.from(ZonedDateTime.now().plusMinutes(60).toInstant()))
+                .withExpiresAt(Date.from(ZonedDateTime.now().plusMinutes(120).toInstant()))
                 .sign(Algorithm.HMAC256(SECRET_KEY));
     }
 
