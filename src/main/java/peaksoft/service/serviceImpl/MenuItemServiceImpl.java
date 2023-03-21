@@ -45,19 +45,19 @@ public class MenuItemServiceImpl implements MenuItemService {
 
     @Override
     public SimpleResponse save(MenuItemRequest request) {
-            Restaurant restaurant = restaurantRepository.findById(request.restaurantId()).orElseThrow(() -> new NotFoundException("Restaurant with id: " + request.restaurantId() + " is no exist!"));
-            Subcategory subcategory = subcategoryRepository.findById(request.subcategoryId()).orElseThrow(() -> new NotFoundException("Subcategory with id: " + request.subcategoryId() + " is no exist!"));
-            MenuItem menuItem = new MenuItem();
-            menuItem.setRestaurant(restaurant);
-            menuItem.setSubcategory(subcategory);
-            menuItem.setName(request.name());
-            menuItem.setImage(request.image());
-            menuItem.setPrice(request.price());
-            menuItem.setDescription(request.description());
-            menuItem.setVegetarian(request.isVegetarian());
-            menuItem.setInStock(true);
-            menuItemRepository.save(menuItem);
-            return SimpleResponse.builder().status(HttpStatus.OK).message("MenuItem with id: " + menuItem.getId() + " is saved!").build();
+        Restaurant restaurant = restaurantRepository.findById(request.restaurantId()).orElseThrow(() -> new NotFoundException("Restaurant with id: " + request.restaurantId() + " is no exist!"));
+        Subcategory subcategory = subcategoryRepository.findById(request.subcategoryId()).orElseThrow(() -> new NotFoundException("Subcategory with id: " + request.subcategoryId() + " is no exist!"));
+        MenuItem menuItem = new MenuItem();
+        menuItem.setRestaurant(restaurant);
+        menuItem.setSubcategory(subcategory);
+        menuItem.setName(request.name());
+        menuItem.setImage(request.image());
+        menuItem.setPrice(request.price());
+        menuItem.setDescription(request.description());
+        menuItem.setVegetarian(request.isVegetarian());
+        menuItem.setInStock(true);
+        menuItemRepository.save(menuItem);
+        return SimpleResponse.builder().status(HttpStatus.OK).message("MenuItem with id: " + menuItem.getId() + " is saved!").build();
     }
 
     @Override
@@ -92,26 +92,23 @@ public class MenuItemServiceImpl implements MenuItemService {
 
     @Override
     public List<MenuItemResponse> globalSearch(String word) {
+        LocalDate currentDate = LocalDate.now();
+
         if (word == null) {
-            log.info(" null bolso");
             for (StopList stop : stopListRepository.findAll()) {
-                if(stop.getDate().getYear()==LocalDate.now().getYear() && stop.getDate().getMonth()==LocalDate.now().getMonth() && stop.getDate().getDayOfMonth()==LocalDate.now().getDayOfMonth()) {
+                if (stop.getDate().equals(currentDate)) {
                     stop.getMenuItem().setInStock(false);
-                    log.info("baransr");
-                    menuItemRepository.save(stop.getMenuItem());
-                }else {
+                    stopListRepository.save(stop);
+                } else {
                     stop.getMenuItem().setInStock(true);
-                    menuItemRepository.save(stop.getMenuItem());
+                    stopListRepository.save(stop);
                 }
-                return menuItemRepository.getAllMenus();
             }
+            return menuItemRepository.getAllMenus();
         } else {
-            log.info("not null bol");
             return menuItemRepository.globalSearch(word);
         }
-        return null;
     }
-
 
 
     @Override

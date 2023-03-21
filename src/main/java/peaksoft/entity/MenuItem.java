@@ -13,11 +13,11 @@ import static jakarta.persistence.CascadeType.*;
 @Getter
 @Setter
 @Entity
-@Table(name ="menu_items")
+@Table(name = "menu_items")
 public class MenuItem {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "menu_item_seq")
-    @SequenceGenerator(name = "menu_item_seq",allocationSize = 1)
+    @SequenceGenerator(name = "menu_item_seq", allocationSize = 1)
     private Long id;
     private String name;
     private String image;
@@ -27,12 +27,15 @@ public class MenuItem {
     @JsonIgnore
     @ManyToMany(cascade = ALL, mappedBy = "menuItems")
     private List<Cheque> cheques;
+    @JsonIgnore
     @ManyToOne(cascade = {MERGE, REFRESH, PERSIST, DETACH})
     private Restaurant restaurant;
-
-    @OneToOne(mappedBy = "menuItem",cascade = ALL)
+    @JsonIgnore
+    @OneToOne(mappedBy = "menuItem", cascade = ALL)
     private StopList stopList;
-    @ManyToOne(cascade ={MERGE, REFRESH, PERSIST, DETACH} )
+    @JsonIgnore
+    @ManyToOne(cascade = {MERGE, REFRESH, PERSIST, DETACH})
     private Subcategory subcategory;
-     private Boolean InStock;
+    @JsonIgnore
+    private Boolean InStock;
 }

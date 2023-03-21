@@ -1,6 +1,7 @@
 package peaksoft.service.serviceImpl;
 
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ import java.util.NoSuchElementException;
  * @created : Lenovo Nuriza
  **/
 @Service
+@Slf4j
 public class ChequeServiceImpl implements ChequeService {
     private final ChequeRepository chequeRepository;
     private final UserRepository userRepository;
@@ -57,12 +59,32 @@ public class ChequeServiceImpl implements ChequeService {
 
     @Override
     public List<ChequeResponse> getAll() {
-        return chequeRepository.getAllChecks();
+        List<Cheque> cheques = chequeRepository.findAll();
+        List<ChequeResponse> chequeResponses = new ArrayList<>();
+        ChequeResponse chequeResponse = new ChequeResponse();
+        for (Cheque che:cheques) {
+            chequeResponse.setId(che.getId());
+            chequeResponse.setFullName(che.getUser().getFirstName()+che.getUser().getLastName());
+            chequeResponse.setItems(che.getMenuItems());
+            chequeResponse.setAveragePrice(che.getPriceAverage());
+            chequeResponse.setService(che.getUser().getRestaurant().getService());
+            chequeResponse.setGrandTotal(che.getGrandTotal());
+            chequeResponses.add(chequeResponse);
+        }
+        return chequeResponses;
     }
 
     @Override
     public ChequeResponse getById(Long id) {
-        return chequeRepository.getCHeckById(id).orElseThrow(() -> new NotFoundException("Check with id: "+id+" not found!"));
+        Cheque che = chequeRepository.findById(id).orElseThrow(() -> new NotFoundException("Cheque with id: " + id + " is no exist!"));
+        ChequeResponse chequeResponse = new ChequeResponse();
+        chequeResponse.setId(che.getId());
+        chequeResponse.setFullName(che.getUser().getFirstName()+che.getUser().getLastName());
+        chequeResponse.setItems(che.getMenuItems());
+        chequeResponse.setAveragePrice(che.getPriceAverage());
+        chequeResponse.setService(che.getUser().getRestaurant().getService());
+        chequeResponse.setGrandTotal(che.getGrandTotal());
+        return chequeResponse;
     }
 
     @Transactional
@@ -103,12 +125,7 @@ public class ChequeServiceImpl implements ChequeService {
 
     @Override
     public Double getAverageSum(Long restId) {
-        double count = 0;
-        for (Cheque cheque : chequeRepository.findAll()) {
-            if(cheque.getUser().getRestaurant().getId().equals(restId) && cheque.getCreatedAt().equals(LocalDate.now())){
-                count += cheque.getGrandTotal();
-            }
-        }
-        return count;
+
+        return chequeRepository.getAverageSum(restId);
     }
 }
