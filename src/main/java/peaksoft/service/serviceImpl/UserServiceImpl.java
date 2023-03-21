@@ -100,7 +100,8 @@ public class UserServiceImpl implements UserService {
             user.setExperience(request.experience());
             user.setRole(request.role());
             user.setRestaurant(restaurant);
-            if (restaurant.getNumberOfEmployees() < 15) {
+            List<UserResponse> users = repository.getAllUsers(restaurant.getId());
+            if (users.size() <= 15) {
                 repository.save(user);
                 return SimpleResponse.builder().status(HttpStatus.OK).message("User with id: " + user.getId() + " is saved").build();
             } else {
@@ -158,7 +159,8 @@ public class UserServiceImpl implements UserService {
         if (word.equalsIgnoreCase("Vacancy")) {
             return repository.getAllApp();
         } else if (word.equalsIgnoreCase("accept")) {
-            if (restaurant.getNumberOfEmployees() < 15) {
+            List<UserResponse> users = repository.getAllUsers(restaurant.getId());
+            if (users.size() <= 15) {
                  assignUserToRest(id, 1L);
             } else
                  SimpleResponse.builder().status(HttpStatus.FORBIDDEN).message("No vacancy").build();

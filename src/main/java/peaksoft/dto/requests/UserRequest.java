@@ -15,7 +15,8 @@ import java.time.LocalDate;
  * @created : Lenovo Nuriza
  **/
 @Builder
-public record UserRequest(
+public record
+UserRequest(
         @NotNull(message = "restaurant id shouldn't be null!")
         @Positive(message = "restaurant id should be positive number!")
         Long restaurantId,
