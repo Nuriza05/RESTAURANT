@@ -1,5 +1,6 @@
 package peaksoft.service.serviceImpl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import peaksoft.entity.MenuItem;
 import peaksoft.entity.Restaurant;
 import peaksoft.entity.StopList;
 import peaksoft.entity.Subcategory;
+import peaksoft.exception.NotFoundException;
 import peaksoft.repository.MenuItemRepository;
 import peaksoft.repository.RestaurantRepository;
 import peaksoft.repository.StopListRepository;
@@ -26,6 +28,7 @@ import java.util.stream.Collectors;
  * @created : Lenovo Nuriza
  **/
 @Service
+@Slf4j
 public class MenuItemServiceImpl implements MenuItemService {
     private final MenuItemRepository menuItemRepository;
     private final RestaurantRepository restaurantRepository;
@@ -42,9 +45,8 @@ public class MenuItemServiceImpl implements MenuItemService {
 
     @Override
     public SimpleResponse save(MenuItemRequest request) {
-        if (request.price() >= 1) {
-            Restaurant restaurant = restaurantRepository.findById(request.restaurantId()).orElseThrow(() -> new NoSuchElementException("Restaurant with id: " + request.restaurantId() + " is no exist!"));
-            Subcategory subcategory = subcategoryRepository.findById(request.subcategoryId()).orElseThrow(() -> new NoSuchElementException("Subcategory with id: " + request.subcategoryId() + " is no exist!"));
+            Restaurant restaurant = restaurantRepository.findById(request.restaurantId()).orElseThrow(() -> new NotFoundException("Restaurant with id: " + request.restaurantId() + " is no exist!"));
+            Subcategory subcategory = subcategoryRepository.findById(request.subcategoryId()).orElseThrow(() -> new NotFoundException("Subcategory with id: " + request.subcategoryId() + " is no exist!"));
             MenuItem menuItem = new MenuItem();
             menuItem.setRestaurant(restaurant);
             menuItem.setSubcategory(subcategory);
@@ -56,34 +58,23 @@ public class MenuItemServiceImpl implements MenuItemService {
             menuItem.setInStock(true);
             menuItemRepository.save(menuItem);
             return SimpleResponse.builder().status(HttpStatus.OK).message("MenuItem with id: " + menuItem.getId() + " is saved!").build();
-        } else {
-            return SimpleResponse.builder().status(HttpStatus.OK).message("Price shouldn't be negative number!").build();
-        }
     }
 
     @Override
     public List<MenuItemResponse> getAll() {
-        for (MenuItem menuItem : menuItemRepository.findAll()) {
-            if (!menuItem.getStopList().getDate().equals(LocalDate.now())) {
-                menuItem.setInStock(true);
-            } else {
-                menuItem.setInStock(false);
-            }
-            menuItemRepository.save(menuItem);
-        }
         return menuItemRepository.getAllMenus();
 
     }
 
     @Override
     public MenuItemResponse getById(Long menuId) {
-        return menuItemRepository.getMenuById(menuId).orElseThrow(() -> new NoSuchElementException("Menu with id: " + menuId + " is no exist!"));
+        return menuItemRepository.getMenuById(menuId).orElseThrow(() -> new NotFoundException("Menu with id: " + menuId + " is no exist!"));
 
     }
 
     @Override
     public SimpleResponse update(Long menuId, MenuItemRequest request) {
-        MenuItem menuItem = menuItemRepository.findById(menuId).orElseThrow(() -> new NoSuchElementException("Menu with id: " + menuId + " is no exist!"));
+        MenuItem menuItem = menuItemRepository.findById(menuId).orElseThrow(() -> new NotFoundException("Menu with id: " + menuId + " is no exist!"));
         menuItem.setName(request.name());
         menuItem.setImage(request.image());
         menuItem.setPrice(request.price());
@@ -102,9 +93,11 @@ public class MenuItemServiceImpl implements MenuItemService {
     @Override
     public List<MenuItemResponse> globalSearch(String word) {
         if (word == null) {
+            log.info(" null bolso");
             for (StopList stop : stopListRepository.findAll()) {
                 if(stop.getDate().getYear()==LocalDate.now().getYear() && stop.getDate().getMonth()==LocalDate.now().getMonth() && stop.getDate().getDayOfMonth()==LocalDate.now().getDayOfMonth()) {
                     stop.getMenuItem().setInStock(false);
+                    log.info("baransr");
                     menuItemRepository.save(stop.getMenuItem());
                 }else {
                     stop.getMenuItem().setInStock(true);
@@ -113,6 +106,7 @@ public class MenuItemServiceImpl implements MenuItemService {
                 return menuItemRepository.getAllMenus();
             }
         } else {
+            log.info("not null bol");
             return menuItemRepository.globalSearch(word);
         }
         return null;

@@ -8,6 +8,7 @@ import peaksoft.dto.responses.SimpleResponse;
 import peaksoft.dto.responses.SubcategoryResponse;
 import peaksoft.entity.Category;
 import peaksoft.entity.Subcategory;
+import peaksoft.exception.NotFoundException;
 import peaksoft.repository.CategoryRepository;
 import peaksoft.repository.SubcategoryRepository;
 import peaksoft.service.SubcategoryService;
@@ -36,12 +37,12 @@ public class SubcategoryServiceImpl implements SubcategoryService {
     @Override
     public SimpleResponse save(SubcategoryRequest request) {
         Subcategory sb = new Subcategory();
-        Category category = ctrepo.findById(request.categoryId()).orElseThrow(() -> new NoSuchElementException("Myndai Category jok!"));
+        Category category = ctrepo.findById(request.categoryId()).orElseThrow(() -> new NotFoundException("Subcateory with id: "+sb.getId()+" is no exist!"));
         sb.setName(request.name());
         sb.setCategory(category);
         category.addSubcategories(sb);
         sbrepo.save(sb);
-        return SimpleResponse.builder().status(HttpStatus.OK).message("Sb is saved!").build();
+        return SimpleResponse.builder().status(HttpStatus.OK).message("Subcategory with id: "+sb.getId()+" is successfully saved!").build();
     }
 
     @Override
@@ -55,23 +56,23 @@ public class SubcategoryServiceImpl implements SubcategoryService {
 
     @Override
     public SubcategoryResponse getById(Long sbcId) {
-        return sbrepo.getSbById(sbcId).orElseThrow(() -> new NoSuchElementException("Myndai sb jok"));
+        return sbrepo.getSbById(sbcId).orElseThrow(() -> new NotFoundException("SubCategory with id: "+sbcId+" is no exist!"));
     }
 
     @Override
     public SimpleResponse update(Long sbcId, SubcategoryRequest request) {
-        Subcategory sb = sbrepo.findById(sbcId).orElseThrow(() -> new NoSuchElementException("Myndai sb jok"));
-        Category category = ctrepo.findById(request.categoryId()).orElseThrow(() -> new NoSuchElementException("Category noooo!"));
+        Subcategory sb = sbrepo.findById(sbcId).orElseThrow(() -> new NotFoundException("SubCategory with id: "+sbcId+" is no exist!"));
+        Category category = ctrepo.findById(request.categoryId()).orElseThrow(() -> new NotFoundException(("Category with id: "+request.categoryId()+" is no exist!")));
         sb.setCategory(category);
         sb.setName(request.name());
         sbrepo.save(sb);
-        return SimpleResponse.builder().status(HttpStatus.OK).message("Updated!").build();
+        return SimpleResponse.builder().status(HttpStatus.OK).message("Subcategory with id: "+sb.getId()+" is successfully saved!").build();
     }
 
     @Override
     public SimpleResponse deleteById(Long sbcId) {
         sbrepo.deleteById(sbcId);
-        return SimpleResponse.builder().status(HttpStatus.OK).message("Deleted!").build();
+        return SimpleResponse.builder().status(HttpStatus.OK).message("Subcategory with id: "+sbcId+" is successfully saved!").build();
     }
 
     @Override

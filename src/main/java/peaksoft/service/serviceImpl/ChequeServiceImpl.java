@@ -10,6 +10,7 @@ import peaksoft.dto.responses.SimpleResponse;
 import peaksoft.entity.Cheque;
 import peaksoft.entity.MenuItem;
 import peaksoft.entity.User;
+import peaksoft.exception.NotFoundException;
 import peaksoft.repository.ChequeRepository;
 import peaksoft.repository.MenuItemRepository;
 import peaksoft.repository.UserRepository;
@@ -39,7 +40,7 @@ public class ChequeServiceImpl implements ChequeService {
     @Override
     public SimpleResponse save(ChequeRequest request) {
         double count = 0;
-        User user = userRepository.findById(request.userId()).orElseThrow(() -> new NoSuchElementException("Cheque is no exist!"));
+        User user = userRepository.findById(request.userId()).orElseThrow(() -> new NotFoundException("User with id: "+request.userId()+" is no exist!"));
         Cheque cheque = new Cheque();
         cheque.setUser(user);
         for (MenuItem menuItem : menuItemRepository.findAllById(request.menuItemsId())) {
@@ -51,7 +52,7 @@ public class ChequeServiceImpl implements ChequeService {
         double total = (count*cheque.getUser().getRestaurant().getService())/100;
         cheque.setGrandTotal(count+total);
         chequeRepository.save(cheque);
-        return SimpleResponse.builder().status(HttpStatus.OK).message("Cheque is saved!").build();
+        return SimpleResponse.builder().status(HttpStatus.OK).message("Cheque with id: "+cheque.getId()+" is saved!").build();
     }
 
     @Override
@@ -61,32 +62,32 @@ public class ChequeServiceImpl implements ChequeService {
 
     @Override
     public ChequeResponse getById(Long id) {
-        return chequeRepository.getCHeckById(id).orElseThrow(() -> new NoSuchElementException("Check not found!"));
+        return chequeRepository.getCHeckById(id).orElseThrow(() -> new NotFoundException("Check with id: "+id+" not found!"));
     }
 
     @Transactional
     @Override
     public SimpleResponse update(Long id, ChequeRequest request) {
-        Cheque cheque = chequeRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Check not found!"));
-        User user = userRepository.findById(request.userId()).orElseThrow(() -> new NoSuchElementException("User not found!"));
+        Cheque cheque = chequeRepository.findById(id).orElseThrow(() -> new NotFoundException("Check with id: "+id+" not found!"));
+        User user = userRepository.findById(request.userId()).orElseThrow(() -> new NotFoundException("User with id: "+id+" not found!"));
         List<MenuItem> menuItems = new ArrayList<>();
 
         System.out.println(cheque);
         for (Long menuItemId : request.menuItemsId()) {
-            MenuItem menuItem = menuItemRepository.findById(menuItemId).get();
+            MenuItem menuItem = menuItemRepository.findById(menuItemId).orElseThrow(() -> new NotFoundException("MenuItem with id: "+id+" not found!"));
             menuItems.add(menuItem);
         }
 
         cheque.setMenuItems(menuItems);
         cheque.setUser(user);
         chequeRepository.save(cheque);
-        return SimpleResponse.builder().status(HttpStatus.OK).message("Successfully updated!").build();
+        return SimpleResponse.builder().status(HttpStatus.OK).message("Cheque with id: "+cheque.getId()+" is successfully updated!").build();
     }
 
     @Override
     public SimpleResponse deleteById(Long id) {
         chequeRepository.deleteById(id);
-        return SimpleResponse.builder().status(HttpStatus.OK).message("Successfully deleted!").build();
+        return SimpleResponse.builder().status(HttpStatus.OK).message("Cheque with id: "+id+" is successfully deleted!!").build();
     }
 
     @Override

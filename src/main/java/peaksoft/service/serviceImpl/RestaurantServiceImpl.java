@@ -8,6 +8,7 @@ import peaksoft.dto.requests.RestaurantRequest;
 import peaksoft.dto.responses.RestaurantResponse;
 import peaksoft.dto.responses.SimpleResponse;
 import peaksoft.entity.Restaurant;
+import peaksoft.exception.NotFoundException;
 import peaksoft.repository.RestaurantRepository;
 import peaksoft.service.RestaurantService;
 
@@ -43,7 +44,7 @@ public class RestaurantServiceImpl implements RestaurantService {
     @Transactional
     @Override
     public SimpleResponse update(Long resId, RestaurantRequest request) {
-        Restaurant rest = restaurantRepo.findById(resId).orElseThrow(() -> new NoSuchElementException("Restaurant with id: " + resId + " is no exist!"));
+        Restaurant rest = restaurantRepo.findById(resId).orElseThrow(() -> new NotFoundException("Restaurant with id: " + resId + " is no exist!"));
         rest.setName(request.name());
         rest.setLocation(request.location());
         rest.setRestType(request.restType());
@@ -61,7 +62,7 @@ public class RestaurantServiceImpl implements RestaurantService {
     public RestaurantResponse getById(Long resId) {
 
         Restaurant restaurant = restaurantRepo.findById(resId)
-                .orElseThrow(() -> new NoSuchElementException("Restaurant with id: " + resId + " not found!"));
+                .orElseThrow(() -> new NotFoundException("Restaurant with id: " + resId + " not found!"));
         restaurant.setNumberOfEmployees(restaurant.getUsers().size());
 
         restaurantRepo.save(restaurant);

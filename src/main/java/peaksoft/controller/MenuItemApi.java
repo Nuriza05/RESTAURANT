@@ -41,7 +41,7 @@ public class MenuItemApi {
         return menuItemService.deleteById(id);
     }
     @PreAuthorize("hasAnyAuthority('ADMIN','CHEF','WAITER')")
-    @GetMapping(("/search"))
+    @PutMapping(("/search"))
     public List<MenuItemResponse> globalSearch(@RequestParam(required = false) @Valid String word){
         return menuItemService.globalSearch(word);
     }

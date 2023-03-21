@@ -9,4 +9,7 @@
       show-sql: true
     jwt:
       secret_key: Java8IsTheBest
+      server:
+        error:
+          include-message: always
 

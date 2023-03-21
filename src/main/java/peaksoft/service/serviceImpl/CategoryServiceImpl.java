@@ -7,6 +7,7 @@ import peaksoft.dto.requests.CategoryRequest;
 import peaksoft.dto.responses.CategoryResponse;
 import peaksoft.dto.responses.SimpleResponse;
 import peaksoft.entity.Category;
+import peaksoft.exception.NotFoundException;
 import peaksoft.repository.CategoryRepository;
 import peaksoft.service.CategoryService;
 
@@ -39,7 +40,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryResponse getById(Long id) {
-        return categoryRepository.getCatById(id).orElseThrow(()->new NoSuchElementException("Category with id: "+id+" is no exist!"));
+        return categoryRepository.getCatById(id).orElseThrow(()->new NotFoundException("Category with id: "+id+" is no exist!"));
     }
 
     @Override
@@ -50,7 +51,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public SimpleResponse update(Long id, Category category) {
-        Category category1 = categoryRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Category with id: " + id + " is no exist!"));
+        Category category1 = categoryRepository.findById(id).orElseThrow(() -> new NotFoundException("Category with id: " + id + " is no exist!"));
         category1.setName(category.getName());
         categoryRepository.save(category1);
         return SimpleResponse.builder().status(HttpStatus.OK).message("Category with id: "+id+" is updated!").build();

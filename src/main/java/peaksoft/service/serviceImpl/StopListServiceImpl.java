@@ -8,6 +8,8 @@ import peaksoft.dto.responses.SimpleResponse;
 import peaksoft.dto.responses.StopListResponse;
 import peaksoft.entity.MenuItem;
 import peaksoft.entity.StopList;
+import peaksoft.exception.AlreadyExistException;
+import peaksoft.exception.NotFoundException;
 import peaksoft.repository.MenuItemRepository;
 import peaksoft.repository.StopListRepository;
 import peaksoft.service.StopListService;
@@ -35,7 +37,7 @@ public class StopListServiceImpl implements StopListService {
         MenuItem menuItem = menuItemRepository.findById(request.menuItemId()).orElseThrow(() -> new NoSuchElementException("MenuItem is not"));
         Boolean exists = stopListRepository.existsByMenuItem(menuItem);
         if (exists && menuItem.getStopList().getDate().equals(request.date())) {
-            throw new KeyAlreadyExistsException("This info already exist!");
+            throw new AlreadyExistException("This info already exist!");
         } else {
             StopList stopList = new StopList();
             stopList.setDate(request.date());
@@ -43,7 +45,7 @@ public class StopListServiceImpl implements StopListService {
             stopList.setMenuItem(menuItem);
             menuItem.setStopList(stopList);
             stopListRepository.save(stopList);
-            return SimpleResponse.builder().status(HttpStatus.OK).message("StopList is saved!").build();
+            return SimpleResponse.builder().status(HttpStatus.OK).message("StopList with id:"+stopList.getId()+" is saved!").build();
         }
     }
 
@@ -54,15 +56,15 @@ public class StopListServiceImpl implements StopListService {
 
     @Override
     public StopListResponse getById(Long id) {
-        return stopListRepository.getStopById(id).orElseThrow(() -> new NoSuchElementException("StopList database de jok!"));
+        return stopListRepository.getStopById(id).orElseThrow(() -> new NotFoundException("StopList with id: "+id+" is no exist!"));
     }
 
     @Override
     public SimpleResponse update(Long id, StopListRequest request) {
         System.out.println(request.menuItemId());
         System.out.println(id);
-        StopList st = stopListRepository.findById(id).orElseThrow(() -> new NoSuchElementException("StopList database de jok!"));
-        MenuItem menuItem = menuItemRepository.findById(request.menuItemId()).orElseThrow(() -> new NoSuchElementException("Myndai Menu jok"));
+        StopList st = stopListRepository.findById(id).orElseThrow(() -> new NotFoundException("StopList with id: "+id+" is no exist!"));
+        MenuItem menuItem = menuItemRepository.findById(request.menuItemId()).orElseThrow(() -> new NotFoundException("Menu item with id: "+request.menuItemId()+" is no exist!"));
 //        Boolean exists = stopListRepository.existsByMenuItem(menuItem);
 //        if (exists && menuItem.getStopList().getDate().equals(request.date())) {
 //            throw new KeyAlreadyExistsException("This info already exist!");
@@ -71,15 +73,15 @@ public class StopListServiceImpl implements StopListService {
             st.setReason(request.reason());
             st.setDate(request.date());
             stopListRepository.save(st);
-            return SimpleResponse.builder().status(HttpStatus.OK).message("It is successfully updated!").build();
+            return SimpleResponse.builder().status(HttpStatus.OK).message("StopList with id: "+st.getId()+" is successfully updated!").build();
         }
 
     @Override
     @Transactional
     public SimpleResponse deleteById(Long id) {
-        StopList st = stopListRepository.findById(id).orElseThrow(() -> new NoSuchElementException("StopList jok"));
+        StopList st = stopListRepository.findById(id).orElseThrow(() -> new NotFoundException("StopList with id: "+id+" is no exist!"));
         st.getMenuItem().setInStock(true);
         stopListRepository.delete(id);
-        return SimpleResponse.builder().status(HttpStatus.OK).message("It is deleted!").build();
+        return SimpleResponse.builder().status(HttpStatus.OK).message("StopList with id: "+st.getId()+" is successfully updated!").build();
     }
 }
