@@ -1,5 +1,6 @@
 package peaksoft.controller;
 
+import jakarta.annotation.security.PermitAll;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,7 +37,7 @@ public class UserApi {
         return userService.saveUserByAdmin(request);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','WAITER','CHEF')")
+    @PermitAll
     @PostMapping("/app")
     public SimpleResponse saveApp(@RequestBody @Valid UserRequestFY requestFY){
         return userService.userApp(requestFY);

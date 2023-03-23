@@ -15,7 +15,7 @@ import java.util.Date;
 @Service
 public class JwtUtil {
 
-    @Value("Java8IsTheBest")
+    @Value("${spring.jwt.secret_key}")
     private String SECRET_KEY;
 
     public String generateToken(UserDetails userDetails){

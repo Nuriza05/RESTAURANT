@@ -3,13 +3,14 @@ package peaksoft.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 import peaksoft.dto.responses.StopListResponse;
 import peaksoft.entity.MenuItem;
 import peaksoft.entity.StopList;
 
 import java.util.List;
 import java.util.Optional;
-
+@Repository
 public interface StopListRepository extends JpaRepository<StopList, Long> {
     @Query("select new peaksoft.dto.responses.StopListResponse(s.menuItem.name,s.id,s.reason,s.date) from StopList s")
      List<StopListResponse> getAllStops();

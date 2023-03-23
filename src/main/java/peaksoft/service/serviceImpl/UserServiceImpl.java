@@ -18,6 +18,7 @@ import peaksoft.dto.responses.UserTokenResponse;
 import peaksoft.entity.Restaurant;
 import peaksoft.entity.User;
 import peaksoft.enums.Role;
+import peaksoft.exception.BadCredentialException;
 import peaksoft.exception.NotFoundException;
 import peaksoft.repository.RestaurantRepository;
 import peaksoft.repository.UserRepository;
@@ -89,13 +90,13 @@ public class UserServiceImpl implements UserService {
     public SimpleResponse saveUserByAdmin(UserRequest request) {
         Restaurant restaurant = restaurantRepository.findById(request.restaurantId()).orElseThrow(() -> new NoSuchElementException("Rest with id: " + request.restaurantId() + " is no exist!"));
         Boolean exists = repository.existsByEmail(request.email());
-        if(!exists) {
+        if (!exists) {
             User user = new User();
             user.setFirstName(request.firstName());
             user.setLastName(request.lastName());
             user.setDateOfBirth(request.dateOfBirth());
             user.setEmail(request.email());
-            user.setPassword(request.password());
+            user.setPassword(encoder.encode(request.password()));
             user.setPhoneNumber(request.phoneNumber());
             user.setExperience(request.experience());
             user.setRole(request.role());
@@ -107,7 +108,7 @@ public class UserServiceImpl implements UserService {
             } else {
                 return SimpleResponse.builder().status(HttpStatus.BAD_REQUEST).message("No vacancy").build();
             }
-        }else {
+        } else {
             return SimpleResponse.builder().status(HttpStatus.CONFLICT).message("Already exist email").build();
         }
     }
@@ -115,13 +116,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public SimpleResponse userApp(UserRequestFY request) {
         Boolean exists = repository.existsByEmail(request.email());
-        if(!exists) {
+        if (!exists) {
             User user = new User();
             user.setFirstName(request.firstName());
             user.setLastName(request.lastName());
             user.setDateOfBirth(request.dateOfBirth());
             user.setEmail(request.email());
-            user.setPassword(request.password());
+            user.setPassword(encoder.encode(request.password()));
             user.setPhoneNumber(request.phoneNumber());
             user.setExperience(request.experience());
             user.setRole(request.role());
@@ -145,42 +146,42 @@ public class UserServiceImpl implements UserService {
             } else {
                 return SimpleResponse.builder().status(HttpStatus.BAD_REQUEST).message("Phone number should starts with +996").build();
             }
-        }else {
+        } else {
             return SimpleResponse.builder().status(HttpStatus.CONFLICT).message("Email already exist!").build();
         }
 
         return null;
-}
+    }
 
 
     @Override
     public List<UserResponse> jobApplication(Long id, String word) {
-        Restaurant restaurant = restaurantRepository.findById(1L).orElseThrow(()->new NotFoundException("Restaurant with no exist"));
+        Restaurant restaurant = restaurantRepository.findById(2L).orElseThrow(() -> new NotFoundException("Restaurant with no exist"));
         if (word.equalsIgnoreCase("Vacancy")) {
             return repository.getAllApp();
         } else if (word.equalsIgnoreCase("accept")) {
             List<UserResponse> users = repository.getAllUsers(restaurant.getId());
             if (users.size() <= 15) {
-                 assignUserToRest(id, 1L);
+                assignUserToRest(id, 2L);
             } else
-                 SimpleResponse.builder().status(HttpStatus.FORBIDDEN).message("No vacancy").build();
+                throw new BadCredentialException("No vacancy");
         } else if (word.equalsIgnoreCase("cancel")) {
-             deleteById(id);
+            deleteById(id);
         } else {
-             SimpleResponse.builder().status(HttpStatus.FORBIDDEN).message("User id or keyWord not matched!").build();
+            throw new BadCredentialException("User id or keyWord not matched!");
         }
         return null;
     }
 
     @Override
     public SimpleResponse assignUserToRest(Long userId, Long restId) {
-        User user = repository.findById(userId).orElseThrow(() -> new NotFoundException("User with id: "+userId+" is no exist!"));
-        Restaurant rest = restaurantRepository.findById(restId).orElseThrow(() -> new NotFoundException("Restaurant with id:"+restId+"is no exist"));
+        User user = repository.findById(userId).orElseThrow(() -> new NotFoundException("User with id: " + userId + " is no exist!"));
+        Restaurant rest = restaurantRepository.findById(restId).orElseThrow(() -> new NotFoundException("Restaurant with id:" + restId + "is no exist"));
         user.setRestaurant(rest);
         rest.addUser(user);
         repository.save(user);
         restaurantRepository.save(rest);
-        return SimpleResponse.builder().status(HttpStatus.OK).message("User with id:"+user.getId()+" is successfully assigned!").build();
+        return SimpleResponse.builder().status(HttpStatus.OK).message("User with id:" + user.getId() + " is successfully assigned!").build();
     }
 
     @Override
@@ -216,11 +217,17 @@ public class UserServiceImpl implements UserService {
         }
         return null;
     }
+
     @Override
     public SimpleResponse deleteById(Long userId) {
+        repository.findById(userId).orElseThrow(()->new NotFoundException("User with id: "+userId+" is no exist"));
         repository.deleteById(userId);
         return SimpleResponse.builder().status(HttpStatus.OK).message("User with id: " + userId + " is deleted!").build();
     }
+
+
+
+
 
 
 }
