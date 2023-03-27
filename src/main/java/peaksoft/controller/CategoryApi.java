@@ -1,5 +1,6 @@
 package peaksoft.controller;
 
+import jakarta.annotation.security.PermitAll;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,7 +29,7 @@ public class CategoryApi {
     public SimpleResponse save(@RequestBody @Valid CategoryRequest category){
         return categoryService.save(category);
     }
-    @PreAuthorize("hasAnyAuthority('ADMIN','CHEF','WAITER')")
+    @PermitAll
     @GetMapping
     public List<CategoryResponse> getAll(){
         return categoryService.getAll();
@@ -49,4 +50,5 @@ public class CategoryApi {
     public SimpleResponse delete(@PathVariable Long id){
         return categoryService.deleteById(id);
     }
+
 }

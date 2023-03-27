@@ -1,5 +1,6 @@
 package peaksoft.controller;
 
+import jakarta.annotation.security.PermitAll;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,13 +31,13 @@ public class SubcategoryApi {
        return subcategoryService.save(request);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','CHEF','WAITER')")
+    @PermitAll
     @GetMapping("/{id}")
     public SubcategoryResponse getById(@PathVariable Long id){
         return subcategoryService.getById(id);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','WAITER','CHEF')")
+    @PermitAll
     @GetMapping("/get")
     public List<SubcategoryResponse> get(@RequestParam(required = false) String word){
         return subcategoryService.getByCategory(word);
@@ -51,7 +52,7 @@ public class SubcategoryApi {
     public SimpleResponse delete(@PathVariable Long id){
         return subcategoryService.deleteById(id);
     }
-    @PreAuthorize("hasAnyAuthority('ADMIN','CHEF','WAITER')")
+    @PermitAll
     @GetMapping("/grouping")
     public Map<String,List<SubcategoryResponse>> filter(){
         return subcategoryService.filterByCategory();

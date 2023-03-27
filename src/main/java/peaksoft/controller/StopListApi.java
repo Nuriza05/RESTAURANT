@@ -1,5 +1,6 @@
 package peaksoft.controller;
 
+import jakarta.annotation.security.PermitAll;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,12 +26,12 @@ public class StopListApi {
     public SimpleResponse save(@RequestBody @Valid StopListRequest request) {
         return stopListService.save(request);
     }
-    @PreAuthorize("hasAnyAuthority('ADMIN','CHEF','WAITER')")
+    @PermitAll
     @GetMapping
     public List<StopListResponse> getAll(){
         return stopListService.getAll();
     }
-    @PreAuthorize("hasAnyAuthority('ADMIN','CHEF','WAITER')")
+    @PermitAll
     @GetMapping("/{id}")
     public StopListResponse getById(@PathVariable Long id){
         return stopListService.getById(id);

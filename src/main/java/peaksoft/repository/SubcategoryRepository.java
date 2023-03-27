@@ -18,4 +18,5 @@ public interface SubcategoryRepository extends JpaRepository<Subcategory, Long> 
     Optional<SubcategoryResponse> getSbById(Long id);
     @Query("select new peaksoft.dto.responses.SubcategoryResponse(s.category.name,s.id,s.name) from Subcategory s where s.category.name ilike %:word% order by s.name")
     List<SubcategoryResponse> getByCategory(String word);
+    Boolean existsByName(String name);
 }

@@ -1,5 +1,6 @@
 package peaksoft.controller;
 
+import jakarta.annotation.security.PermitAll;
 import jakarta.validation.Valid;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,10 +29,6 @@ public class RestaurantApi {
         return restaurantService.save(request);
     }
 
-    @GetMapping
-    public List<RestaurantResponse> getAll(){
-        return restaurantService.getAll();
-    }
     @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/{id}")
     public SimpleResponse update(@PathVariable Long id, @RequestBody @Valid RestaurantRequest request ){
@@ -42,7 +39,7 @@ public class RestaurantApi {
     public SimpleResponse delete(@PathVariable Long id){
         return restaurantService.deleteById(id);
     }
-    @PreAuthorize("hasAnyAuthority('ADMIN','CHEF','WAITER')")
+    @PermitAll
     @GetMapping("/{id}")
     public RestaurantResponse getById(@PathVariable Long id){
         return restaurantService.getById(id);

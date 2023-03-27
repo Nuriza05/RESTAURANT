@@ -10,7 +10,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import peaksoft.config.jwt.JwtUtil;
 import peaksoft.dto.requests.UserRequest;
-import peaksoft.dto.requests.UserRequestFY;
 import peaksoft.dto.requests.UserTokenRequest;
 import peaksoft.dto.responses.SimpleResponse;
 import peaksoft.dto.responses.UserResponse;
@@ -18,7 +17,9 @@ import peaksoft.dto.responses.UserTokenResponse;
 import peaksoft.entity.Restaurant;
 import peaksoft.entity.User;
 import peaksoft.enums.Role;
+import peaksoft.exception.AlreadyExistException;
 import peaksoft.exception.BadCredentialException;
+import peaksoft.exception.BadRequestException;
 import peaksoft.exception.NotFoundException;
 import peaksoft.repository.RestaurantRepository;
 import peaksoft.repository.UserRepository;
@@ -26,7 +27,7 @@ import peaksoft.service.UserService;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.NoSuchElementException;
+
 
 /**
  * @created : Lenovo Nuriza
@@ -88,21 +89,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public SimpleResponse saveUserByAdmin(UserRequest request) {
-        Restaurant restaurant = restaurantRepository.findById(request.restaurantId()).orElseThrow(() -> new NoSuchElementException("Rest with id: " + request.restaurantId() + " is no exist!"));
+        Restaurant restaurant = restaurantRepository.findById(request.restaurantId()).orElseThrow(() -> new NotFoundException("Restaurant with id: " + request.restaurantId() + " is no exist!"));
         Boolean exists = repository.existsByEmail(request.email());
+        List<UserResponse> users = repository.getAllUsers(restaurant.getId());
+        check(request);
         if (!exists) {
-            User user = new User();
-            user.setFirstName(request.firstName());
-            user.setLastName(request.lastName());
-            user.setDateOfBirth(request.dateOfBirth());
-            user.setEmail(request.email());
-            user.setPassword(encoder.encode(request.password()));
-            user.setPhoneNumber(request.phoneNumber());
-            user.setExperience(request.experience());
-            user.setRole(request.role());
-            user.setRestaurant(restaurant);
-            List<UserResponse> users = repository.getAllUsers(restaurant.getId());
             if (users.size() <= 15) {
+                User user = new User();
+                user.setFirstName(request.firstName());
+                user.setLastName(request.lastName());
+                user.setDateOfBirth(request.dateOfBirth());
+                user.setEmail(request.email());
+                user.setPassword(encoder.encode(request.password()));
+                user.setPhoneNumber(request.phoneNumber());
+                user.setExperience(request.experience());
+                user.setRole(request.role());
+                user.setRestaurant(restaurant);
                 repository.save(user);
                 return SimpleResponse.builder().status(HttpStatus.OK).message("User with id: " + user.getId() + " is saved").build();
             } else {
@@ -114,8 +116,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public SimpleResponse userApp(UserRequestFY request) {
+    public SimpleResponse userApp(UserRequest request) {
         Boolean exists = repository.existsByEmail(request.email());
+        check(request);
         if (!exists) {
             User user = new User();
             user.setFirstName(request.firstName());
@@ -126,43 +129,23 @@ public class UserServiceImpl implements UserService {
             user.setPhoneNumber(request.phoneNumber());
             user.setExperience(request.experience());
             user.setRole(request.role());
-            int year = LocalDate.now().minusYears(user.getDateOfBirth().getYear()).getYear();
-            if (user.getPhoneNumber().startsWith("+996")) {
-                if (user.getRole().equals(Role.CHEF)) {
-                    if (year >= 25 && year <= 45 && user.getExperience() >= 2) {
-                        repository.save(user);
-                        return SimpleResponse.builder().status(HttpStatus.OK).message("User with id: " + user.getId() + " is saved").build();
-                    } else {
-                        return SimpleResponse.builder().status(HttpStatus.BAD_REQUEST).message("Chef's years old should be between 25-45 and experience>=2").build();
-                    }
-                } else if (user.getRole().equals(Role.WAITER)) {
-                    if (year >= 18 && year <= 30 && user.getExperience() >= 1) {
-                        repository.save(user);
-                        return SimpleResponse.builder().status(HttpStatus.OK).message("User with id: " + user.getId() + " is saved").build();
-                    } else {
-                        return SimpleResponse.builder().status(HttpStatus.BAD_REQUEST).message("Waiter's years old should be between 18-30 and experience>=1").build();
-                    }
-                }
-            } else {
-                return SimpleResponse.builder().status(HttpStatus.BAD_REQUEST).message("Phone number should starts with +996").build();
-            }
+            repository.save(user);
         } else {
             return SimpleResponse.builder().status(HttpStatus.CONFLICT).message("Email already exist!").build();
         }
-
         return null;
     }
 
 
     @Override
     public List<UserResponse> jobApplication(Long id, String word) {
-        Restaurant restaurant = restaurantRepository.findById(2L).orElseThrow(() -> new NotFoundException("Restaurant with no exist"));
+        Restaurant restaurant = restaurantRepository.findById(restaurantRepository.findAll().get(0).getId()).orElseThrow(() -> new NotFoundException("Restaurant with no exist"));
         if (word.equalsIgnoreCase("Vacancy")) {
             return repository.getAllApp();
         } else if (word.equalsIgnoreCase("accept")) {
             List<UserResponse> users = repository.getAllUsers(restaurant.getId());
             if (users.size() <= 15) {
-                assignUserToRest(id, 2L);
+                assignUserToRest(id,restaurantRepository.findAll().get(0).getId() );
             } else
                 throw new BadCredentialException("No vacancy");
         } else if (word.equalsIgnoreCase("cancel")) {
@@ -191,6 +174,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserResponse> getAll(Long restId) {
+        restaurantRepository.findById(restId).orElseThrow(()->new NotFoundException("Restaurant with id: "+restId+" is no exist!"));
         return repository.getAllUsers(restId);
     }
 
@@ -200,6 +184,7 @@ public class UserServiceImpl implements UserService {
         User user = repository.findById(userId).orElseThrow(() -> new NotFoundException("User with id: " + userId + " is no exist!"));
         List<User> all = repository.findAll();
         all.remove(user);
+        check(request);
         for (User user1 : all) {
             if (!user1.getEmail().equals(request.email())) {
                 user.setFirstName(request.firstName());
@@ -220,14 +205,28 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public SimpleResponse deleteById(Long userId) {
-        repository.findById(userId).orElseThrow(()->new NotFoundException("User with id: "+userId+" is no exist"));
+        repository.findById(userId).orElseThrow(() -> new NotFoundException("User with id: " + userId + " is no exist"));
         repository.deleteById(userId);
         return SimpleResponse.builder().status(HttpStatus.OK).message("User with id: " + userId + " is deleted!").build();
     }
 
-
-
-
-
-
+    private void check(UserRequest request) {
+        Boolean existsPh = repository.existsByPhoneNumber(request.phoneNumber());
+        if (existsPh) {
+            throw new AlreadyExistException("User with phone number: " + request.phoneNumber() + " is already exist!");
+        }
+        if (!request.phoneNumber().startsWith("+996")) {
+            throw new BadRequestException("Phone number should starts with +996");
+        }
+        int year = LocalDate.now().minusYears(request.dateOfBirth().getYear()).getYear();
+        if (request.role().equals(Role.CHEF)) {
+            if (year <= 25 || year >= 45 && request.experience() <= 2) {
+                throw new BadRequestException("Chef's years old should be between 25-45 and experience>=2");
+            }
+        } else if (request.role().equals(Role.WAITER)) {
+            if (year <= 18 || year >= 30 && request.experience() <= 1) {
+                throw new BadRequestException("Waiter's years old should be between 18-30 and experience>=1");
+            }
+        }
+    }
 }

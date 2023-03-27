@@ -8,12 +8,11 @@ import peaksoft.dto.requests.RestaurantRequest;
 import peaksoft.dto.responses.RestaurantResponse;
 import peaksoft.dto.responses.SimpleResponse;
 import peaksoft.entity.Restaurant;
+import peaksoft.exception.BadRequestException;
 import peaksoft.exception.NotFoundException;
 import peaksoft.repository.RestaurantRepository;
 import peaksoft.service.RestaurantService;
-
 import java.util.List;
-import java.util.NoSuchElementException;
 
 /**
  * @created : Lenovo Nuriza
@@ -28,19 +27,21 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     @Override
     public SimpleResponse save(RestaurantRequest request) {
-        Restaurant rest = new Restaurant();
-        rest.setName(request.name());
-        rest.setRestType(request.restType());
-        rest.setLocation(request.location());
-        rest.setService(request.service());
-        restaurantRepo.save(rest);
-        return SimpleResponse.builder().status(HttpStatus.OK).message( "Restaurant with name: " + rest.getName() + " is saved!").build();
+        List<Restaurant> all = restaurantRepo.findAll();
+        if(all.isEmpty()) {
+            Restaurant rest = new Restaurant();
+            rest.setName(request.name());
+            rest.setRestType(request.restType());
+            rest.setLocation(request.location());
+            rest.setService(request.service());
+            restaurantRepo.save(rest);
+            return SimpleResponse.builder().status(HttpStatus.OK).message("Restaurant with name: " + rest.getName() + " is saved!").build();
+        }
+        else {
+            throw new BadRequestException("Restaurant is already exist!");
+        }
     }
 
-    @Override
-    public List<RestaurantResponse> getAll(){
-        return restaurantRepo.getAllRest();
-    }
     @Transactional
     @Override
     public SimpleResponse update(Long resId, RestaurantRequest request) {
@@ -54,6 +55,7 @@ public class RestaurantServiceImpl implements RestaurantService {
     }
     @Override
     public SimpleResponse deleteById(Long resId) {
+        restaurantRepo.findById(resId).orElseThrow(()->new NotFoundException("Restaurant with id: "+resId+" is no exist"));
         restaurantRepo.deleteById(resId);
         return SimpleResponse.builder().status(HttpStatus.OK).message( "Restaurant with name: " + resId+ " is deleted!").build();
     }

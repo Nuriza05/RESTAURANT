@@ -2,6 +2,7 @@ package peaksoft.service;
 
 import peaksoft.dto.requests.MenuItemRequest;
 import peaksoft.dto.responses.MenuItemResponse;
+import peaksoft.dto.responses.PaginationResponse;
 import peaksoft.dto.responses.SimpleResponse;
 import peaksoft.entity.MenuItem;
 
@@ -22,4 +23,5 @@ public interface MenuItemService {
     Map<Boolean, List<MenuItemResponse>> filterByVegetarian();
 
 
+    PaginationResponse getItemPagination(int page, int size);
 }

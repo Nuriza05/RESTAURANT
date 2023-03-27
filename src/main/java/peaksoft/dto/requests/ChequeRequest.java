@@ -12,10 +12,10 @@ import java.util.List;
 @Builder
 public record ChequeRequest(
         @NotNull(message = "User id shouldn't be null!")
-        @Positive(message = "user id should be positive number!")
+
         Long userId,
         @NotNull(message = "Menu items id shouldn't be null!")
-        @Positive(message = "menu items id should be positive number!")
+
         List<Long> menuItemsId
 ) {
 

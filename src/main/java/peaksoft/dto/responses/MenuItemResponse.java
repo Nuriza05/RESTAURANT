@@ -5,7 +5,6 @@ import peaksoft.entity.Subcategory;
 
 @Builder
 public record MenuItemResponse(
-        String categoryName,
         Long id,
         String name,
         String image,

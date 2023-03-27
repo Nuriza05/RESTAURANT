@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import peaksoft.dto.requests.UserRequest;
-import peaksoft.dto.requests.UserRequestFY;
 import peaksoft.dto.requests.UserTokenRequest;
 import peaksoft.dto.responses.SimpleResponse;
 import peaksoft.dto.responses.UserResponse;
@@ -39,8 +38,8 @@ public class UserApi {
 
     @PermitAll
     @PostMapping("/app")
-    public SimpleResponse saveApp(@RequestBody @Valid UserRequestFY requestFY){
-        return userService.userApp(requestFY);
+    public SimpleResponse saveApp(@RequestBody @Valid UserRequest request){
+        return userService.userApp(request);
     }
 
 
@@ -50,13 +49,13 @@ public class UserApi {
         return userService.jobApplication(id, word);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','CHEF','WAITER')")
+    @PermitAll
     @GetMapping("/getAll/{restId}")
     public List<UserResponse> getAll(@PathVariable Long restId) {
         return userService.getAll(restId);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','CHEF','WAITER')")
+    @PermitAll
     @GetMapping("/get/{userId}")
     public UserResponse getById(@PathVariable Long userId) {
         return userService.getById(userId);

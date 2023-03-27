@@ -10,6 +10,7 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
     Boolean existsByEmail(String email);
+    Boolean existsByPhoneNumber(String phoneNumber);
     @Query("select new peaksoft.dto.responses.UserResponse(l.id,concat(l.firstName,l.lastName),l.dateOfBirth,l.email,l.phoneNumber,l.experience) from User l where l.restaurant.id=:resId")
     List<UserResponse> getAllUsers(Long resId);
     @Query("select new peaksoft.dto.responses.UserResponse(l.id,concat(l.firstName,l.lastName),l.dateOfBirth,l.email,l.phoneNumber,l.experience) from User l where l.id=:id")

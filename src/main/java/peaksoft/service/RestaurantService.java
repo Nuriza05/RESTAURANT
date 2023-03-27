@@ -10,7 +10,6 @@ import java.util.List;
  **/
 public interface RestaurantService {
     SimpleResponse save(RestaurantRequest request);
-    List<RestaurantResponse> getAll();
     SimpleResponse update(Long resId, RestaurantRequest request);
     SimpleResponse deleteById(Long resId);
     RestaurantResponse getById(Long resId);
