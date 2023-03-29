@@ -34,9 +34,22 @@ public class StopListServiceImpl implements StopListService {
 
     @Override
     public SimpleResponse save(StopListRequest request) {
-        MenuItem menuItem = menuItemRepository.findById(request.menuItemId()).orElseThrow(() -> new NoSuchElementException("MenuItem is not"));
+        MenuItem menuItem = menuItemRepository.findById(request.menuItemId()).orElseThrow(() -> new NotFoundException("MenuItem is not"));
         Boolean exists = stopListRepository.existsByMenuItem(menuItem);
-        if (!exists && !menuItem.getStopList().getDate().equals(request.date())) {
+        if(!(menuItem.getStopList()==null)) {
+            if (!exists && !menuItem.getStopList().getDate().equals(request.date())) {
+                StopList stopList = new StopList();
+                stopList.setDate(request.date());
+                stopList.setReason(request.reason());
+                stopList.setMenuItem(menuItem);
+                menuItem.setStopList(stopList);
+                stopListRepository.save(stopList);
+                return SimpleResponse.builder().status(HttpStatus.OK).message("StopList with id:" + stopList.getId() + " is saved!").build();
+
+            } else {
+                throw new AlreadyExistException("This info already exist!");
+            }
+        }else {
             StopList stopList = new StopList();
             stopList.setDate(request.date());
             stopList.setReason(request.reason());
@@ -44,8 +57,6 @@ public class StopListServiceImpl implements StopListService {
             menuItem.setStopList(stopList);
             stopListRepository.save(stopList);
             return SimpleResponse.builder().status(HttpStatus.OK).message("StopList with id:" + stopList.getId() + " is saved!").build();
-        } else {
-            throw new AlreadyExistException("This info already exist!");
         }
     }
 

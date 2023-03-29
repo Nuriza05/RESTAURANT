@@ -37,4 +37,6 @@ public interface MenuItemRepository extends JpaRepository<MenuItem, Long> {
     Boolean existsByName(String name);
 
     Page<MenuItemResponse> findAllBy(Pageable pageable);
+    @Query("select m from MenuItem m where m.subcategory.category.id=:categoryId")
+    List<MenuItem> getByCategoryId(Long categoryId);
 }

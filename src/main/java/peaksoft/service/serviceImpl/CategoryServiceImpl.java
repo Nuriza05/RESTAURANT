@@ -5,15 +5,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import peaksoft.dto.requests.CategoryRequest;
 import peaksoft.dto.responses.CategoryResponse;
+import peaksoft.dto.responses.MenuItemResponse;
 import peaksoft.dto.responses.SimpleResponse;
 import peaksoft.entity.Category;
+import peaksoft.entity.MenuItem;
 import peaksoft.exception.AlreadyExistException;
 import peaksoft.exception.NotFoundException;
 import peaksoft.repository.CategoryRepository;
+import peaksoft.repository.MenuItemRepository;
 import peaksoft.service.CategoryService;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 /**
  * @created : Lenovo Nuriza
@@ -21,10 +23,12 @@ import java.util.NoSuchElementException;
 @Service
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
+    private final MenuItemRepository menuItemRepository;
 
     @Autowired
-    public CategoryServiceImpl(CategoryRepository categoryRepository) {
+    public CategoryServiceImpl(CategoryRepository categoryRepository, MenuItemRepository menuItemRepository) {
         this.categoryRepository = categoryRepository;
+        this.menuItemRepository = menuItemRepository;
     }
 
     @Override
@@ -52,6 +56,11 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public SimpleResponse deleteById(Long id) {
         categoryRepository.findById(id).orElseThrow(() -> new NotFoundException("Category with id: " + id + " is no exist!"));
+        List<MenuItem> menus = menuItemRepository.getByCategoryId(id);
+        for (MenuItem menu : menus) {
+            menu.setSubcategory(null);
+            menuItemRepository.deleteById(menu.getId());
+        }
         categoryRepository.deleteById(id);
         return SimpleResponse.builder().status(HttpStatus.OK).message("Category with id: " + id + " is deleted!").build();
     }

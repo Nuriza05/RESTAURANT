@@ -1,5 +1,6 @@
 package peaksoft.dto.requests;
 
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Builder;
@@ -16,6 +17,7 @@ public record StopListRequest(
         @NotNull(message = "reason shouldn't be null!")
         String reason,
         @NotNull(message = "date shouldn't be null!")
+        @Future
         LocalDate date
 
 ){
